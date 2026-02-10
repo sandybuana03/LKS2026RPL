@@ -9,11 +9,11 @@
     <div class="grid grid-cols-1 gap-6">
         <?php
         // Query untuk mengambil tugas kelas siswa dan mengecek apakah sudah dikumpulkan
-        $q = mysqli_query($conn, "SELECT t.*, p.status as status_kumpul, p.nilai, p.tgl_kumpul 
-                                FROM tugas t 
-                                LEFT JOIN pengumpulan p ON t.id_tugas = p.id_tugas AND p.id_siswa = '$id_siswa'
-                                WHERE t.id_kelas = '$id_kelas_siswa' 
-                                ORDER BY t.deadline ASC");
+        $q = mysqli_query($conn, "SELECT t.*, p.status as status_kumpul, p.nilai, p.tgl_kumpul, p.catatan_guru 
+                        FROM tugas t 
+                        LEFT JOIN pengumpulan p ON t.id_tugas = p.id_tugas AND p.id_siswa = '$id_siswa'
+                        WHERE t.id_kelas = '$id_kelas_siswa' 
+                        ORDER BY t.deadline ASC");
         
         while($d = mysqli_fetch_assoc($q)):
             $is_submitted = !empty($d['status_kumpul']);
@@ -42,20 +42,28 @@
             </div>
 
             <div class="text-center min-w-[150px]">
-                <?php if($is_submitted): ?>
-                    <div class="mb-2">
-                        <span class="text-xs text-slate-400 font-bold uppercase">Nilai Anda</span>
-                        <h4 class="text-4xl font-black text-indigo-600"><?= $d['nilai'] ?? '--' ?></h4>
-                    </div>
-                <?php elseif(!$is_expired): ?>
-                    <button data-toggle="modal" data-target="#modalTugas<?= $d['id_tugas'] ?>" 
-                            class="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
-                        Kerjakan
-                    </button>
-                <?php else: ?>
-                    <span class="text-red-400 font-bold">Waktu Habis</span>
-                <?php endif; ?>
+    <?php if($is_submitted): ?>
+        <div class="mb-2">
+            <span class="text-xs text-slate-400 font-bold uppercase">Nilai Anda</span>
+            <h4 class="text-4xl font-black text-indigo-600"><?= $d['nilai'] ?? '--' ?></h4>
+        </div>
+        
+        <?php if(!empty($d['catatan_guru'])): ?>
+            <div class="mt-4 p-3 bg-indigo-50 rounded-xl border border-indigo-100">
+                <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-tighter">Catatan Guru:</p>
+                <p class="text-xs text-indigo-700 italic">"<?= $d['catatan_guru'] ?>"</p>
             </div>
+        <?php endif; ?>
+        
+    <?php elseif(!$is_expired): ?>
+        <button data-toggle="modal" data-target="#modalTugas<?= $d['id_tugas'] ?>" 
+                class="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
+            Kerjakan
+        </button>
+    <?php else: ?>
+        <span class="text-red-400 font-bold">Waktu Habis</span>
+    <?php endif; ?>
+</div>
         </div>
 
         <div class="modal fade" id="modalTugas<?= $d['id_tugas'] ?>">
